@@ -43,8 +43,6 @@ export const agentSchema = z.object({
   traffic_used_bytes: z.number().default(0),
   traffic_month: z.string().default(''),
   realm_version: z.string().default(''),
-  multiplex_capable: z.boolean().default(false),
-  multiplex_port: z.number().default(443),
 })
 
 export const agentFullSchema = z.object({

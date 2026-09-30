@@ -1,6 +1,5 @@
 ﻿import { fileURLToPath, URL } from 'node:url'
 import react from '@vitejs/plugin-react'
-import tailwindcss from '@tanstack/vite-plugin-tailwindcss' 
 import tailwindVite from '@tailwindcss/vite'
 import { defineConfig } from 'vitest/config'
 

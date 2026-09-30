@@ -291,32 +291,4 @@ function CreateAgentDialog({ open, onClose }: { open: boolean; onClose: () => vo
   )
 }
 
-function MuxToggle({ agent }: { agent: Agent }) {
-  const { t } = useTranslation()
-  const qc = useQueryClient()
-  const [capable, setCapable] = useState(agent.multiplex_capable)
-  const [port, setPort] = useState(agent.multiplex_port || 443)
-  const mut = useMutation({
-    mutationFn: () => setAgentMux(agent.id, { multiplex_capable: capable, multiplex_port: port }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['agents'] }),
-  })
-  return (
-    <div className='space-y-3'>
-      <label className='flex cursor-pointer items-center gap-3'>
-        <input type='checkbox' className='size-4 rounded' checked={capable} onChange={e => setCapable(e.target.checked)} disabled={mut.isPending} />
-        <span className='text-sm'>{capable ? t('muxEnabled') : t('muxDisabled')}</span>
-      </label>
-      {capable && (
-        <div className='flex items-center gap-2'>
-          <label className='text-sm text-muted-foreground shrink-0'>{t('muxPort')}</label>
-          <Input type='number' value={port} onChange={e => setPort(Number(e.target.value))} min='1' max='65535' className='w-28' disabled={mut.isPending} />
-        </div>
-      )}
-      <Button size='sm' variant='outline' onClick={() => mut.mutate()} disabled={mut.isPending}>
-        {mut.isPending ? t('saving') : t('saveMux')}
-      </Button>
-      {mut.isSuccess && <span className='text-xs text-success'>{t('apiKeyCopied')}</span>}
-    </div>
-  )
-}
 import React from 'react'
