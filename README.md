@@ -137,3 +137,5 @@ bash <(curl -fsSL https://raw.githubusercontent.com/yaog6700-bit/Swell-norrna/ma
 ```
 
 会询问是否同时删除数据目录（转发规则、账号等），按需选择。
+
+FORK:SubLane和REX的logo。
