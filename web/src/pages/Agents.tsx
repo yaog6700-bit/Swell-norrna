@@ -97,7 +97,7 @@ function AgentRow({ agent }: { agent: Agent }) {
           <div className='hidden items-center gap-4 text-xs text-muted-foreground sm:flex'>
             <span>CPU {agent.cpu_usage.toFixed(1)}%</span>
             {agent.memory_total > 0 && <span>{((agent.memory_usage / agent.memory_total) * 100).toFixed(0)}% RAM</span>}
-            {agent.realm_version && <span>Realm {agent.realm_version}</span>}
+            {agent.realm_version && <span>{agent.realm_version}</span>}
           </div>
         )}
         {agent.traffic_quota_bytes > 0 && (
