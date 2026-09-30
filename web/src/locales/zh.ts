@@ -1,4 +1,4 @@
-﻿import type { en } from './en'
+import type { en } from './en'
 
 export const zh: Record<keyof typeof en, string> = {
   demoTitle: '只读演示',

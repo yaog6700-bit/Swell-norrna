@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft, LoaderCircle } from 'lucide-react'
@@ -92,7 +92,7 @@ export function Auth({ mode }: { mode: 'setup' | 'login' }) {
         </Button>
       )}
       {creating && (
-        <p className='mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground'>{t('setupProgress')}</p>
+        <p className='mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground'>{t('setupProgress', { current: 2 })}</p>
       )}
       <h1 ref={heading} tabIndex={-1} className='text-2xl font-semibold tracking-tight outline-none'>
         {creating ? t('createAdmin') : t('signInTitle')}
