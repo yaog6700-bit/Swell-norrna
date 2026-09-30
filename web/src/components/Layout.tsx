@@ -1,4 +1,4 @@
-﻿import { type ReactNode } from 'react'
+import { type ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link, Outlet, useRouterState } from '@tanstack/react-router'
 import { LayoutDashboard, Route, Server, Settings, Globe } from 'lucide-react'
@@ -54,7 +54,7 @@ function Navigation() {
     <Sidebar className='border-r border-border'>
       <SidebarHeader className='px-3 py-4'>
         <div className='flex min-w-0 items-center gap-2'>
-          <Link to='/' className='flex size-10 shrink-0 items-center justify-center rounded-lg bg-foreground text-background focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring [@media(pointer:coarse)]:size-11' aria-label={t('appName')}>
+          <Link to='/' className='flex size-10 shrink-0 items-center justify-center rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring [@media(pointer:coarse)]:size-11' aria-label={t('appName')}>
             <Logo className='size-6' />
           </Link>
           <div className='min-w-0 flex-1 px-1'>
