@@ -1,4 +1,4 @@
-﻿import { useState } from 'react'
+import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Plus, Trash2, RefreshCw, Server, Copy, Check, ChevronDown, ChevronUp, Pencil } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -118,7 +118,7 @@ function AgentRow({ agent }: { agent: Agent }) {
         <div className='border-t border-border bg-muted/30 px-5 py-4'>
           <p className='mb-2 text-xs font-medium text-muted-foreground'>{t('installCmdLabel')}</p>
           <code className='block rounded-lg bg-muted p-3 text-xs break-all leading-6'>
-            {"bash <(curl -fsSL http://PANEL_IP:3000/norrna_agent.sh) server=PANEL_IP:3001 apikey=" + agent.api_key + " dns=223.5.5.5:53"}
+            {`bash <(curl -fsSL ${window.location.protocol}//${window.location.hostname}:${window.location.port || (window.location.protocol === "https:" ? "443" : "80")}/norrna_agent.sh) server=${window.location.hostname}:${String(Number(window.location.port || (window.location.protocol === "https:" ? 443 : 80)) + 1)} apikey=${agent.api_key} dns=223.5.5.5:53`}
           </code>
           {full && (
             <div className='mt-4'>
