@@ -146,20 +146,27 @@ pub async fn apply_manager() -> Result<String> {
 }
 
 async fn replace_dist(client: &reqwest::Client, url: &str, dir: &std::path::Path) -> Result<()> {
-    use std::io::Read;
     let bytes = client.get(url)
         .send().await?.error_for_status()?.bytes().await?;
     let dist_dir = dir.join("dist");
     let tmp_dir = dir.join("dist.tmp");
-    // Extract to temp dir first
     let _ = std::fs::remove_dir_all(&tmp_dir);
     std::fs::create_dir_all(&tmp_dir)?;
     let cursor = std::io::Cursor::new(bytes);
     let gz = flate2::read::GzDecoder::new(cursor);
     let mut archive = tar::Archive::new(gz);
-    archive.set_strip_components(1);
-    archive.unpack(&tmp_dir)?;
-    // Atomically swap
+    // Manually strip first path component (equivalent to --strip-components=1)
+    for entry in archive.entries()? {
+        let mut entry = entry?;
+        let path = entry.path()?.into_owned();
+        let stripped = path.components().skip(1).collect::<std::path::PathBuf>();
+        if stripped.as_os_str().is_empty() { continue; }
+        let dest = tmp_dir.join(&stripped);
+        if let Some(parent) = dest.parent() {
+            std::fs::create_dir_all(parent)?;
+        }
+        entry.unpack(&dest)?;
+    }
     let _ = std::fs::remove_dir_all(&dist_dir);
     std::fs::rename(&tmp_dir, &dist_dir)?;
     Ok(())
