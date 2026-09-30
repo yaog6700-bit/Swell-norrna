@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 
-const REPO: &str = "dododook/Norrna";
+const REPO: &str = "yaog6700-bit/Swell-norrna";
 
 #[derive(Debug, Deserialize)]
 struct GhRelease {

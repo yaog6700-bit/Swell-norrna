@@ -8,7 +8,7 @@ members = [
 
 [workspace.package]
 edition = "2021"
-version = "26.1.40"
+version = "1.0.0"
 license = "MIT"
 authors = ["Norrna"]
 
