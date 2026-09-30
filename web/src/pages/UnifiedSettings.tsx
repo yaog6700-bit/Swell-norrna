@@ -1,4 +1,4 @@
-﻿import { useState } from 'react'
+import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { Bell, ArrowUpCircle, Palette, Shield } from 'lucide-react'
@@ -170,14 +170,14 @@ function UpdateSection() {
   return (
     <div className='rounded-xl border border-border bg-card divide-y divide-border'>
       <Row label={t('currentVersion')}>
-        <span className='text-sm font-mono'>{isPending ? '…' : (data?.current_version || '—')}</span>
+        <span className='text-sm font-mono'>{isPending ? '…' : (data?.current || '—')}</span>
       </Row>
       <Row label={t('latestVersion')}>
-        <span className={'text-sm font-mono ' + (data?.has_update ? 'text-warning font-semibold' : '')}>
-          {isPending ? '…' : (data?.latest_version || '—')}
+        <span className={'text-sm font-mono ' + (data?.update_available ? 'text-warning font-semibold' : '')}>
+          {isPending ? '…' : (data?.latest || '—')}
         </span>
       </Row>
-      {data?.has_update && (
+      {data?.update_available && (
         <div className='px-5 py-3'>
           <p className='text-sm text-warning'>{t('updateAvailable')}</p>
         </div>
@@ -189,7 +189,7 @@ function UpdateSection() {
           <Button variant='outline' onClick={() => refetch()} disabled={isFetching}>
             {t('checkUpdate')}
           </Button>
-          {data?.has_update && (
+          {data?.update_available && (
             <Button onClick={() => upd.mutate()} disabled={upd.isPending}>
               {upd.isPending ? t('updating') : t('updateManager')}
             </Button>
