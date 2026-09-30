@@ -137,7 +137,7 @@ pub async fn apply_manager() -> Result<String> {
     if let Some(url) = asset_url(&rel.assets, "norrna") {
         let _ = replace_bin(&client, url, &dir.join("norrna")).await;
     }
-    schedule_restart("norrna-manager");
+    schedule_restart("swell-norrna");
     Ok(rel.version)
 }
 
