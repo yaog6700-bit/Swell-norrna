@@ -128,3 +128,12 @@ GitHub Actions 自动编译并发布二进制 + Docker 镜像。
 |------|------|
 | 9000 | Web 管理面板 |
 | 9001 | Agent 连接 |
+---
+
+## 卸载
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/yaog6700-bit/Swell-norrna/main/uninstall.sh)
+```
+
+会询问是否同时删除数据目录（转发规则、账号等），按需选择。
