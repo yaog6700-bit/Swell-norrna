@@ -1,4 +1,4 @@
-﻿use crate::auth::{
+use crate::auth::{
     clear_cookie, cookie_header, make_token, parse_token, password_md5, token_from_cookie,
 };
 use crate::hub::AgentHub;
@@ -396,6 +396,7 @@ fn public_agent(a: &AgentConfig) -> serde_json::Value {
         "traffic_used_bytes": a.traffic_used_bytes,
         "traffic_month": a.traffic_month,
         "realm_version": a.realm_version,
+        "api_key": a.api_key,
     })
 }
 

@@ -68,8 +68,20 @@ function AgentRow({ agent }: { agent: Agent }) {
     enabled: expanded,
   })
   const copyInstallCmd = () => {
-    const cmd = "bash <(curl -fsSL http://PANEL_IP:3000/norrna_agent.sh) server=PANEL_IP:3001 apikey=" + agent.api_key + " dns=223.5.5.5:53"
-    navigator.clipboard.writeText(cmd).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000) })
+    const host = window.location.hostname
+    const webPort = window.location.port || (window.location.protocol === 'https:' ? '443' : '80')
+    const agentPort = String(Number(webPort) + 1)
+    const cmd = 'bash <(curl -fsSL ' + window.location.protocol + '//' + host + ':' + webPort + '/norrna_agent.sh) server=' + host + ':' + agentPort + ' apikey=' + agent.api_key + ' dns=223.5.5.5:53'
+    const fallback = () => {
+      const ta = document.createElement('textarea')
+      ta.value = cmd; ta.style.position = 'fixed'; ta.style.opacity = '0'
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy')
+      document.body.removeChild(ta)
+    }
+    const done = () => { setCopied(true); setTimeout(() => setCopied(false), 2000) }
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(cmd).then(done).catch(() => { fallback(); done() })
+    } else { fallback(); done() }
   }
   return (
     <div>
