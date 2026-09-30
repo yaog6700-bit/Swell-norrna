@@ -59,9 +59,9 @@ export const settingsSchema = z.object({
 })
 
 export const updateInfoSchema = z.object({
-  current_version: z.string().default(''),
-  latest_version: z.string().default(''),
-  has_update: z.boolean().default(false),
+  current: z.string().default(''),
+  latest: z.string().default(''),
+  update_available: z.boolean().default(false),
   release_url: z.string().default(''),
 })
 

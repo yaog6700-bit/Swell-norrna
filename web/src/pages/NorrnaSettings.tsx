@@ -119,18 +119,18 @@ function UpdateSettings_() {
           <div className='space-y-2 text-sm'>
             <div className='flex items-center justify-between'>
               <span className='text-muted-foreground'>当前版本</span>
-              <span className='font-medium'>{data?.current_version || '未知'}</span>
+              <span className='font-medium'>{data?.current || '未知'}</span>
             </div>
             <div className='flex items-center justify-between'>
               <span className='text-muted-foreground'>最新版本</span>
-              <span className={'font-medium ' + (data?.has_update ? 'text-warning' : '')}>{data?.latest_version || '未知'}</span>
+              <span className={'font-medium ' + (data?.update_available ? 'text-warning' : '')}>{data?.latest || '未知'}</span>
             </div>
-            {data?.has_update && (
+            {data?.update_available && (
               <div className='rounded-lg bg-warning-muted px-4 py-3 text-xs text-warning'>
                 新版本可获取新功能和安全修复
               </div>
             )}
-            {!data?.has_update && data?.current_version && (
+            {!data?.update_available && data?.current && (
               <div className='rounded-lg bg-muted px-4 py-3 text-xs text-muted-foreground'>
                 已是最新版本
               </div>
@@ -144,7 +144,7 @@ function UpdateSettings_() {
             <RefreshCw className={'size-4 ' + (isFetching ? 'motion-safe:animate-spin' : '')} />
             检查更新
           </Button>
-          {data?.has_update && (
+          {data?.update_available && (
             <Button onClick={() => upd.mutate()} disabled={upd.isPending}>
               {upd.isPending ? '更新中…' : '立即更新'}
             </Button>
