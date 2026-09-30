@@ -33,4 +33,4 @@ EXPOSE 9000 9001
 ENV WEBPORT=9000
 ENV AGENTPORT=9001
 
-CMD ["/app/norrna-manager", "--webport", "9000", "--agentport", "9001", "--data", "/data"]
+CMD ["/app/norrna-manager", "--webport", "9000", "--agentport", "9001", "--data-dir", "/data"]
