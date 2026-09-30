@@ -139,3 +139,34 @@ bash <(curl -fsSL https://raw.githubusercontent.com/yaog6700-bit/Swell-norrna/ma
 会询问是否同时删除数据目录（转发规则、账号等），按需选择。
 
 FORK:SubLane和REX的logo。
+
+---
+
+## Agent 节点管理
+
+### 安装 Agent
+
+在面板「Agents」页面添加节点后，点复制图标获取完整安装命令，在目标机器上运行即可。
+
+命令格式：
+```bash
+bash <(curl -fsSL http://面板IP:9000/norrna_agent.sh) server=面板IP:9001 apikey=你的KEY dns=223.5.5.5:53
+```
+
+### 节点常用命令
+
+```bash
+# 查看日志
+journalctl -u norrna-agent -f
+
+# 启动 / 停止 / 重启
+systemctl start norrna-agent
+systemctl stop norrna-agent
+systemctl restart norrna-agent
+
+# 更新节点二进制
+bash <(curl -fsSL http://面板IP:9000/norrna_agent.sh) update
+
+# 卸载节点（会询问是否保留数据）
+bash <(curl -fsSL http://面板IP:9000/norrna_agent.sh) uninstall
+```
