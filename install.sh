@@ -33,6 +33,12 @@ step "Installing dependencies"
 apt-get update -qq
 apt-get install -y -qq curl wget tar
 
+# Stop service before updating binaries (avoids "Text file busy" error)
+if systemctl is-active --quiet "$SERVICE_NAME" 2>/dev/null; then
+  warn "Stopping existing service..."
+  systemctl stop "$SERVICE_NAME"
+fi
+
 step "Getting latest version"
 LATEST=$(curl -fsSL "https://api.github.com/repos/${REPO}/releases/latest" \
   | grep '"tag_name"' | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/')
@@ -55,6 +61,7 @@ chmod +x realm
 
 curl -fL --retry 5 --progress-bar \
   -o dist.tar.gz "${BASE_URL}/dist.tar.gz"
+rm -rf dist
 mkdir -p dist
 tar -xzf dist.tar.gz --strip-components=1 -C dist
 rm dist.tar.gz
@@ -81,7 +88,7 @@ EOF
 
 systemctl daemon-reload
 systemctl enable "$SERVICE_NAME"
-systemctl restart "$SERVICE_NAME"
+systemctl start "$SERVICE_NAME"
 info "Service started"
 
 if command -v ufw &>/dev/null; then
