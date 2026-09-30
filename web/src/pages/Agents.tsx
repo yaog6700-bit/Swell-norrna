@@ -90,7 +90,7 @@ function AgentRow({ agent }: { agent: Agent }) {
           <span className={'size-2 shrink-0 rounded-full ' + (agent.status === 'online' ? 'bg-success' : 'bg-muted-foreground')} />
           <div className='min-w-0'>
             <p className='truncate text-sm font-medium'>{agent.name}</p>
-            <p className='truncate text-xs text-muted-foreground'>{agent.ip || ''}{agent.hostname ? ' (' + agent.hostname + ')' : ''}</p>
+            <p className='truncate text-xs text-muted-foreground'>{(agent.ip || '').replace(/^::ffff:/, '')}{agent.hostname && agent.hostname !== 'localhost' ? ' (' + agent.hostname + ')' : ''}</p>
           </div>
         </div>
         {agent.status === 'online' && (
