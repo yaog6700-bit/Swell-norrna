@@ -1,0 +1,15 @@
+﻿/target
+**/*.rs.bk
+.idea
+.vscode
+data/
+instances/
+*.json
+!Cargo.toml
+# Frontend
+web/node_modules/
+web/dist/
+web/.pnpm-store/
+
+# Dev
+mock-server.js

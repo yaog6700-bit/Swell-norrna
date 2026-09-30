@@ -1,0 +1,263 @@
+import { render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { createMemoryHistory } from '@tanstack/react-router'
+import { expect, it, vi } from 'vitest'
+import { App } from '@/App'
+import { createAppRouter } from '@/router'
+import {
+  authenticated,
+  memberAuthenticated,
+  hourlyActivity,
+  system,
+  workspaces,
+} from '@/test/fixtures'
+
+const metrics = {
+  requests: 2,
+  completed: 1,
+  incomplete: 0,
+  errors: 1,
+  canceled: 0,
+  rejected: 0,
+  duration_ms: 840,
+  input_tokens: 120,
+  output_tokens: 38,
+  cached_tokens: 0,
+  input_reported: 1,
+  output_reported: 1,
+  cached_reported: 0,
+}
+const summary = {
+  activity: hourlyActivity,
+  from_day: 1900000000,
+  to_day: 1900086400,
+  tracking_since: 1900000000,
+  totals: metrics,
+  days: [{ id: '1900000000', name: '2030-03-17', ...metrics }],
+  members: [],
+  models: [
+    { id: 'codex/synthetic-model', name: 'codex/synthetic-model', ...metrics },
+  ],
+  groups: [],
+}
+
+it.each([
+  ['/', memberAuthenticated, '/api/me/usage'],
+  ['/admin/usage', authenticated, '/api/usage'],
+] as const)(
+  'shows honest usage totals at %s and changes the period',
+  async (path, session, endpoint) => {
+    const fetch = vi.fn().mockImplementation((url: string) => {
+      if (url === '/api/auth/state')
+        return Promise.resolve(new Response(JSON.stringify(session)))
+      if (url === '/api/workspaces')
+        return Promise.resolve(new Response(JSON.stringify(workspaces)))
+      if (url === '/api/connection')
+        return Promise.resolve(
+          new Response(JSON.stringify({ status: 'ready' })),
+        )
+      if (url === '/api/me/allocations')
+        return Promise.resolve(new Response(JSON.stringify({ schemes: [] })))
+      if (url === '/api/me/limits')
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              user_id: 2,
+              requests_per_minute: 0,
+              max_concurrency: 0,
+              in_flight: 0,
+              requests_this_minute: 0,
+              reset_at: 1900000060,
+            }),
+          ),
+        )
+      if (url.startsWith(endpoint + '?'))
+        return Promise.resolve(new Response(JSON.stringify(summary)))
+      return Promise.reject(new Error('Unexpected privileged data request'))
+    })
+    vi.stubGlobal('fetch', fetch)
+    const user = userEvent.setup()
+    render(
+      <App
+        router={createAppRouter(
+          createMemoryHistory({ initialEntries: [path] }),
+        )}
+      />,
+    )
+    await screen.findByRole('heading', {
+      name: path === '/' ? 'Your usage' : 'Team usage',
+    })
+    if (path === '/') {
+      expect(
+        screen.getByRole('heading', { name: 'Your workspace', level: 1 }),
+      ).toBeTruthy()
+      expect(
+        screen.getByRole('heading', { name: 'Your usage', level: 2 }),
+      ).toBeTruthy()
+      expect(screen.queryByRole('link', { name: 'Usage' })).toBeNull()
+    }
+    await screen.findByText(
+      'Some calls did not report token usage; totals include reported values only.',
+    )
+    await screen.findByRole('img', { name: 'Daily · Requests' })
+    await screen.findByRole('region', { name: 'Activity by time' })
+    expect(screen.getAllByRole('gridcell')).toHaveLength(168)
+    if (path === '/')
+      await screen.findByText('No resource allowances assigned.')
+    const reads = fetch.mock.calls.filter(
+      ([url]) => url === endpoint + '?days=7',
+    ).length
+    await user.click(
+      screen.getByRole('button', {
+        name: path === '/' ? 'Your usage: Refresh' : 'Refresh',
+      }),
+    )
+    await waitFor(() =>
+      expect(
+        fetch.mock.calls.filter(([url]) => url === endpoint + '?days=7').length,
+      ).toBeGreaterThan(reads),
+    )
+    expect(screen.queryByRole('table')).toBeNull()
+    await user.click(screen.getByRole('button', { name: 'View details' }))
+    expect(screen.getByRole('table', { name: 'Daily' })).toBeTruthy()
+    await user.click(screen.getByRole('button', { name: 'Hide details' }))
+    await user.click(screen.getByRole('button', { name: 'Usage period' }))
+    await user.click(
+      screen.getByRole('menuitemradio', { name: 'Last 30 days' }),
+    )
+    await waitFor(() =>
+      expect(
+        fetch.mock.calls.some(([url]) => url === endpoint + '?days=30'),
+      ).toBe(true),
+    )
+    await user.click(screen.getByRole('button', { name: 'Breakdown' }))
+    await user.click(screen.getByRole('menuitemradio', { name: 'Models' }))
+    await screen.findByText('codex/synthetic-model')
+    expect(
+      screen.getByRole('region', { name: 'Activity by time' }),
+    ).toBeTruthy()
+    expect(
+      fetch.mock.calls.every(
+        ([url]) =>
+          url === '/api/auth/state' ||
+          url === '/api/workspaces' ||
+          url === '/api/connection' ||
+          url === '/api/me/limits' ||
+          url === '/api/me/allocations' ||
+          url.startsWith(endpoint + '?'),
+      ),
+    ).toBe(true)
+  },
+)
+
+it('shows personal usage beneath the administrator overview', async () => {
+  const fetch = vi.fn().mockImplementation((url: string) => {
+    if (url === '/api/auth/state')
+      return Promise.resolve(new Response(JSON.stringify(authenticated)))
+    if (url === '/api/workspaces')
+      return Promise.resolve(new Response(JSON.stringify(workspaces)))
+    if (url === '/api/system')
+      return Promise.resolve(new Response(JSON.stringify(system)))
+    if (url.startsWith('/api/me/usage?'))
+      return Promise.resolve(new Response(JSON.stringify(summary)))
+    if (url === '/api/me/allocations')
+      return Promise.resolve(new Response(JSON.stringify({ schemes: [] })))
+    if (url === '/api/me/limits')
+      return Promise.resolve(
+        new Response(
+          JSON.stringify({
+            user_id: 1,
+            requests_per_minute: 0,
+            max_concurrency: 0,
+            in_flight: 0,
+            requests_this_minute: 0,
+            reset_at: 1900000060,
+          }),
+        ),
+      )
+    return Promise.reject(new Error(`Unexpected request: ${url}`))
+  })
+  vi.stubGlobal('fetch', fetch)
+  render(
+    <App
+      router={createAppRouter(createMemoryHistory({ initialEntries: ['/'] }))}
+    />,
+  )
+  expect(
+    await screen.findByRole('heading', {
+      name: 'Workspace overview',
+      level: 1,
+    }),
+  ).toBeTruthy()
+  expect(
+    await screen.findByRole('heading', { name: 'Your usage', level: 2 }),
+  ).toBeTruthy()
+  expect(
+    await screen.findByRole('img', { name: 'Daily · Requests' }),
+  ).toBeTruthy()
+  expect(screen.queryByRole('heading', { name: 'Service' })).toBeNull()
+  expect(screen.getByRole('heading', { name: 'Gateway setup' })).toBeTruthy()
+  expect(screen.getByRole('link', { name: 'Instance status' })).toBeTruthy()
+  expect(
+    screen
+      .getByRole('heading', { name: 'Gateway setup' })
+      .compareDocumentPosition(
+        screen.getByRole('heading', { name: 'Your usage' }),
+      ) & Node.DOCUMENT_POSITION_FOLLOWING,
+  ).toBeTruthy()
+  expect(
+    screen
+      .getByText(
+        'Some calls did not report token usage; totals include reported values only.',
+      )
+      .compareDocumentPosition(
+        screen.getByRole('heading', { name: 'My resource allowances' }),
+      ) & Node.DOCUMENT_POSITION_FOLLOWING,
+  ).toBeTruthy()
+  expect(screen.queryByRole('link', { name: 'Usage' })).toBeNull()
+  expect(screen.getByRole('link', { name: 'Team usage' })).toBeTruthy()
+  expect(fetch.mock.calls.some(([url]) => url === '/api/me/usage?days=7')).toBe(
+    true,
+  )
+})
+
+it('redirects the former personal usage URL to the combined home page', async () => {
+  vi.stubGlobal(
+    'fetch',
+    vi.fn().mockImplementation((url: string) => {
+      if (url === '/api/auth/state')
+        return Promise.resolve(
+          new Response(JSON.stringify(memberAuthenticated)),
+        )
+      if (url === '/api/workspaces')
+        return Promise.resolve(new Response(JSON.stringify(workspaces)))
+      if (url.startsWith('/api/me/usage?'))
+        return Promise.resolve(new Response(JSON.stringify(summary)))
+      if (url === '/api/me/allocations')
+        return Promise.resolve(new Response(JSON.stringify({ schemes: [] })))
+      if (url === '/api/me/limits')
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              user_id: 2,
+              requests_per_minute: 0,
+              max_concurrency: 0,
+              in_flight: 0,
+              requests_this_minute: 0,
+              reset_at: 1900000060,
+            }),
+          ),
+        )
+      return Promise.reject(new Error(`Unexpected request: ${url}`))
+    }),
+  )
+  const router = createAppRouter(
+    createMemoryHistory({ initialEntries: ['/usage'] }),
+  )
+  render(<App router={router} />)
+  await screen.findByRole('heading', { name: 'Your workspace' })
+  expect(router.state.location.pathname).toBe('/')
+  expect(
+    await screen.findByRole('heading', { name: 'Your usage' }),
+  ).toBeTruthy()
+})

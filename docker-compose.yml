@@ -1,0 +1,27 @@
+﻿services:
+  norrna:
+    build: .
+    image: norrna-manager:latest
+    container_name: norrna-manager
+    restart: unless-stopped
+    ports:
+      - "9000:9000"   # Web panel
+      - "9001:9001"   # Agent TCP
+    volumes:
+      - norrna-data:/data
+    environment:
+      - WEBPORT=9000
+      - AGENTPORT=9001
+      - DATA_DIR=/data
+      # Optional: set your timezone
+      - TZ=Asia/Shanghai
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:9000/api/auth/check-setup"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  norrna-data:
+    driver: local

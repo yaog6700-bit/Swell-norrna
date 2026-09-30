@@ -1,0 +1,1 @@
+﻿export function Invite() { return <div>Invite page</div> }

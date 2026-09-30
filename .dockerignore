@@ -1,0 +1,20 @@
+﻿# Rust build artifacts
+target/
+
+# Node modules
+web/node_modules/
+web/.pnpm-store/
+
+# Dev files
+.git/
+.gitignore
+*.md
+mock-server.js
+web/dist/
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
