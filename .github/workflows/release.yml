@@ -1,4 +1,4 @@
-﻿name: release
+name: release
 
 on:
   push:
@@ -64,6 +64,12 @@ jobs:
       - name: Install aarch64 linker
         if: matrix.target == 'aarch64-unknown-linux-gnu'
         run: sudo apt-get update && sudo apt-get install -y gcc-aarch64-linux-gnu
+
+      - name: Set version from tag
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          sed -i "s/^version = .*/version = \"$VERSION\"/" Cargo.toml
+          echo "Building version $VERSION"
 
       - name: Build Rust
         env:

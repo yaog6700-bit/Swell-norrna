@@ -137,8 +137,32 @@ pub async fn apply_manager() -> Result<String> {
     if let Some(url) = asset_url(&rel.assets, "norrna") {
         let _ = replace_bin(&client, url, &dir.join("norrna")).await;
     }
+    // Also update frontend dist files
+    if let Some(url) = rel.assets.get("dist.tar.gz") {
+        let _ = replace_dist(&client, url, &dir).await;
+    }
     schedule_restart("swell-norrna");
     Ok(rel.version)
+}
+
+async fn replace_dist(client: &reqwest::Client, url: &str, dir: &std::path::Path) -> Result<()> {
+    use std::io::Read;
+    let bytes = client.get(url)
+        .send().await?.error_for_status()?.bytes().await?;
+    let dist_dir = dir.join("dist");
+    let tmp_dir = dir.join("dist.tmp");
+    // Extract to temp dir first
+    let _ = std::fs::remove_dir_all(&tmp_dir);
+    std::fs::create_dir_all(&tmp_dir)?;
+    let cursor = std::io::Cursor::new(bytes);
+    let gz = flate2::read::GzDecoder::new(cursor);
+    let mut archive = tar::Archive::new(gz);
+    archive.set_strip_components(1);
+    archive.unpack(&tmp_dir)?;
+    // Atomically swap
+    let _ = std::fs::remove_dir_all(&dist_dir);
+    std::fs::rename(&tmp_dir, &dist_dir)?;
+    Ok(())
 }
 
 pub fn schedule_restart(service: &str) {
