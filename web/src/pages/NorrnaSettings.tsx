@@ -1,9 +1,8 @@
-﻿import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getSettings, saveSettings, testTelegram, checkUpdate, updateManager } from '@/lib/norrna-api'
 import type { AppSettings } from '@/lib/norrna-api'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
-import { useState } from 'react'
 import { Bell, RefreshCw, ArrowUpCircle } from 'lucide-react'
 
 export function NorrnaSettings() {
@@ -77,20 +76,20 @@ function NotificationSettings() {
           <div className='flex flex-col gap-2'>
             <label className='flex items-center gap-3 text-sm'>
               <input type='checkbox' name='notify_offline' defaultChecked={data?.notify_offline ?? true} className='rounded' />
-              Agent 离线提醒
+              Agent 离线
             </label>
             <label className='flex items-center gap-3 text-sm'>
               <input type='checkbox' name='notify_quota' defaultChecked={data?.notify_quota ?? true} className='rounded' />
-              流量超额提醒
+              流量超限
             </label>
           </div>
         </div>
-        {test.isSuccess && <p className='text-sm text-success'>测试消息已发送！</p>}
+        {test.isSuccess && <p className='text-sm text-success'>测试消息已发送</p>}
         {test.isError && <p className='text-sm text-error'>发送失败，请检查配置</p>}
-        {save.isSuccess && <p className='text-sm text-success'>设置已保存</p>}
+        {save.isSuccess && <p className='text-sm text-success'>已保存</p>}
         {save.isError && <p className='text-sm text-error'>保存失败</p>}
         <div className='flex gap-2 pt-1'>
-          <Button type='submit' disabled={save.isPending}>{save.isPending ? '保存中…' : '保存设置'}</Button>
+          <Button type='submit' disabled={save.isPending}>{save.isPending ? '保存中…' : '保存'}</Button>
           <Button type='button' variant='outline' onClick={() => test.mutate()} disabled={test.isPending}>
             {test.isPending ? '发送中…' : '发送测试消息'}
           </Button>
@@ -115,26 +114,31 @@ function UpdateSettings_() {
       </div>
       <div className='space-y-4'>
         {isPending ? (
-          <p className='text-sm text-muted-foreground'>检查更新中…</p>
+          <p className='text-sm text-muted-foreground'>检查中…</p>
         ) : (
           <div className='space-y-2 text-sm'>
             <div className='flex items-center justify-between'>
               <span className='text-muted-foreground'>当前版本</span>
-              <span className='font-medium'>{data?.current_version || '—'}</span>
+              <span className='font-medium'>{data?.current_version || '未知'}</span>
             </div>
             <div className='flex items-center justify-between'>
               <span className='text-muted-foreground'>最新版本</span>
-              <span className={'font-medium ' + (data?.has_update ? 'text-warning' : '')}>{data?.latest_version || '—'}</span>
+              <span className={'font-medium ' + (data?.has_update ? 'text-warning' : '')}>{data?.latest_version || '未知'}</span>
             </div>
             {data?.has_update && (
               <div className='rounded-lg bg-warning-muted px-4 py-3 text-xs text-warning'>
-                发现新版本，建议更新以获取最新功能和安全修复。
+                新版本可获取新功能和安全修复
+              </div>
+            )}
+            {!data?.has_update && data?.current_version && (
+              <div className='rounded-lg bg-muted px-4 py-3 text-xs text-muted-foreground'>
+                已是最新版本
               </div>
             )}
           </div>
         )}
-        {upd.isSuccess && <p className='text-sm text-success'>更新成功，正在重启…</p>}
-        {upd.isError && <p className='text-sm text-error'>更新失败</p>}
+        {upd.isSuccess && <p className='text-sm text-success'>更新成功，约 8 秒后自动重启，请刷新页面</p>}
+        {upd.isError && <p className='text-sm text-error'>更新失败，请检查网络或手动更新</p>}
         <div className='flex gap-2'>
           <Button variant='outline' onClick={() => refetch()} disabled={isFetching}>
             <RefreshCw className={'size-4 ' + (isFetching ? 'motion-safe:animate-spin' : '')} />
@@ -142,7 +146,7 @@ function UpdateSettings_() {
           </Button>
           {data?.has_update && (
             <Button onClick={() => upd.mutate()} disabled={upd.isPending}>
-              {upd.isPending ? '更新中…' : '立即更新面板'}
+              {upd.isPending ? '更新中…' : '立即更新'}
             </Button>
           )}
         </div>
